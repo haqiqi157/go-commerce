@@ -3,6 +3,8 @@ package main
 import (
 	"go-echo/configs"
 	"go-echo/internal/builder"
+	"go-echo/pkg/cache"
+	"go-echo/pkg/encrypt"
 	"go-echo/pkg/postgres"
 	"go-echo/pkg/server"
 	"go-echo/pkg/token"
@@ -16,12 +18,16 @@ func main() {
 	checkError(err)
 
 	db, err := postgres.InitPostgres(&cfg.Postgres)
+
 	checkError(err)
 
-	tokenUseCase := token.NewTokenUseCase(cfg.JWT.SecretKey)
+	redisDB := cache.InitCache(&cfg.Redis)
 
-	publicRoutes := builder.BuildAppPublicRoutes(db, tokenUseCase)
-	privateRoutes := builder.BuildAppPrivateRoutes(db)
+	tokenUseCase := token.NewTokenUseCase(cfg.JWT.SecretKey)
+	encryptTool := encrypt.NewEncryptTool(cfg.Encrypt.SecretKey, cfg.Encrypt.IV)
+
+	publicRoutes := builder.BuildAppPublicRoutes(db, tokenUseCase, encryptTool)
+	privateRoutes := builder.BuildAppPrivateRoutes(db, redisDB, encryptTool)
 
 	srv := server.NewServer("app", publicRoutes, privateRoutes, cfg.JWT.SecretKey)
 	srv.Run()

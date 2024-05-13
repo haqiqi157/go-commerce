@@ -70,7 +70,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 
 	id := uuid.MustParse(input.ID)
 
-	inputUser := entity.UpdateUser(id, input.Email, input.Password, input.Address, input.Phone, input.Role)
+	inputUser := entity.UpdateUser(id, input.Email, input.Password, input.Role, input.Address, input.Phone)
 
 	updatedUser, err := h.userService.UpdateUser(inputUser)
 
@@ -113,5 +113,5 @@ func (h *UserHandler) FindUserByID(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, response.SuccessResponse(http.StatusOK, "sux`kses menampilkan data user", user))
+	return c.JSON(http.StatusOK, response.SuccessResponse(http.StatusOK, "sukses menampilkan data user", user))
 }
